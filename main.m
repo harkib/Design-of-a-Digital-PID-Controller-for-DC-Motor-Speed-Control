@@ -1,6 +1,8 @@
 %% MSE 481 - Project 2
-%% Part 1
+close all;
+clear;
 
+%% Part 1: Creating a sampled-data model of the plant
 % Part 1a: obtain continuous Laplace transform for the DC motor as a symbolic model
 
 J = 0.01; % kg.m^2
@@ -8,10 +10,34 @@ b = 0.1; % N.m.s
 K = 0.01; % V/rad.sec
 R = 1; % ohm 
 L = 0.5; % H
+T = .05; % s
 
 numerator = K;
 denominator = [J*L, J*R+b*L, b*R + K^2];
-sys = tf(numerator ,denominator );
+sysc = tf(numerator ,denominator );
 
 % Part 1b: Convert the obtained Laplace transform to the discrete z-domain
-sysd = c2d(sys,.05,'zoh');
+sysd = c2d(sysc,T,'zoh');
+
+%% Part 2: Design of a digital PID Controller
+% Part 2a: Obtain the closed-loop response of the system
+cl_sysd = feedback(sysd,1);
+
+% Part 2a: Plot the discrete step response of the closed-loop system
+X = linspace(0,10,10/T + 1);
+X = transpose(X);
+Y = step(cl_sysd,10);
+
+figure
+stairs(X,Y)
+title('Discrete step response of the closed-loop system - No controller')
+xlabel('Time (s)') 
+ylabel('Rotational speed (rad/s)') 
+
+% Part 2a: Analyze the performance of the response of the system in terms of steady-state error and transient response
+step_info = stepinfo(cl_sysd);
+disp('Discrete step response of the closed-loop system - No controller')
+disp(['Steady State Error: ',num2str(step_info.SettlingMax)])
+disp(['Transient Response: ',num2str(step_info.RiseTime)])
+
+
