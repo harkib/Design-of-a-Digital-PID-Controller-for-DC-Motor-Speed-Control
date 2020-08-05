@@ -63,7 +63,7 @@ xlabel('Time (s)')
 ylabel('Rotational speed (rad/s)')
 
 % Part 2b: Is there any value for Ts showing that the system is stable?
-Ts = [0.01, 0.008, 0.005, 0.002, 0.001];
+Ts = [0.05, 0.01, 0.008, 0.005, 0.002, 0.001];
 
 for T = Ts
     
@@ -73,12 +73,18 @@ for T = Ts
     X = linspace(0,10,10/T + 1);
     X = transpose(X);
     Y = step(cl_PIDd,10);
-
+    step_info = stepinfo(cl_PIDd);
+    
     figure
     stairs(X,Y)
     title(append('Discrete step response of the closed-loop system T = ', num2str(T),'s'))
     xlabel('Time (s)') 
     ylabel('Rotational speed (rad/s)')
+    info = {append('Steady State Error: ',num2str(1 - step_info.SettlingMax)),
+        append('Overshoot: ',num2str(step_info.Overshoot)),
+        append('Settling Time: ',num2str(step_info.SettlingTime))};
+    
+    annotation('textbox',[.5 .3 .1 .1],'String',info,'FitBoxToText','on')
 end
 
 %% Part 3: Stability analysis of a Digital Controller
