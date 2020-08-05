@@ -81,5 +81,18 @@ for T = Ts
     ylabel('Rotational speed (rad/s)')
 end
 
+%% Part 3: Stability analysis of a Digital Controller
+Ts = [.05, 0.01, 0.008, 0.005, 0.002, 0.001];
+
+for T = Ts
+    
+    sysd = c2d(sysc,T,'zoh');
+    PIDd = c2d(PIDc,T,'Tustin');
+    cl_PIDd = feedback(sysd*PIDd,1);
+
+    figure
+    rlocus(cl_PIDd)
+    title(append('Root Locus of the closed-loop system T = ', num2str(T),'s'))
+end
 
 
