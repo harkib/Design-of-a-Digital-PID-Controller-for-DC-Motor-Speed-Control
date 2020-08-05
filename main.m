@@ -37,7 +37,49 @@ ylabel('Rotational speed (rad/s)')
 % Part 2a: Analyze the performance of the response of the system in terms of steady-state error and transient response
 step_info = stepinfo(cl_sysd);
 disp('Discrete step response of the closed-loop system - No controller')
-disp(['Steady State Error: ',num2str(step_info.SettlingMax)])
+disp(['Steady State Error: ',num2str(1 - step_info.SettlingMax)])
 disp(['Transient Response: ',num2str(step_info.RiseTime)])
+
+% Part 2b: Convert the Laplace PID controller to z-domain PID controller
+Kp = 100;
+Ki = 200;
+Kd = 10;
+
+numerator = [Kd,Kp,Ki];
+denominator = [1,0];
+PIDc = tf(numerator ,denominator);
+PIDd = c2d(PIDc,T,'Tustin');
+
+% Part 2b: Plot the response of Closed loop system
+cl_PIDd = feedback(sysd*PIDd,1);
+X = linspace(0,10,10/T + 1);
+X = transpose(X);
+Y = step(cl_PIDd,10);
+
+figure
+stairs(X,Y)
+title('Discrete step response of the closed-loop system')
+xlabel('Time (s)') 
+ylabel('Rotational speed (rad/s)')
+
+% Part 2b: Is there any value for Ts showing that the system is stable?
+Ts = [0.01, 0.008, 0.005, 0.002, 0.001];
+
+for T = Ts
+    
+    sysd = c2d(sysc,T,'zoh');
+    PIDd = c2d(PIDc,T,'Tustin');
+    cl_PIDd = feedback(sysd*PIDd,1);
+    X = linspace(0,10,10/T + 1);
+    X = transpose(X);
+    Y = step(cl_PIDd,10);
+
+    figure
+    stairs(X,Y)
+    title(append('Discrete step response of the closed-loop system T = ', num2str(T),'s'))
+    xlabel('Time (s)') 
+    ylabel('Rotational speed (rad/s)')
+end
+
 
 
